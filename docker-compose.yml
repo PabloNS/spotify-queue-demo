@@ -1,0 +1,21 @@
+version: '3'
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    restart: always
+    ports:
+      - 27017:27017
+  #redis:
+  #  image: redis:alpine
+  #  container_name: redis
+  #  ports:
+  #    - 6379:6379
+  spotify-queue-demo:
+    image: spotify-queue-demo:latest
+    container_name: spotify-queue-demo
+    ports:
+      - 8080:8080
+    depends_on:
+      - mongo
+  #    - redis
