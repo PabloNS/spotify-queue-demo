@@ -55,7 +55,6 @@ public class SpotifyService {
         urlStringBuilder.append("uri=").append(queueSongDto.getTrackId());
         urlStringBuilder.append("&device_id=").append(queueSongDto.getDeviceId());
 
-        //String token = getToken();
         StringBuilder bearerToken = new StringBuilder("Bearer ").append(client.getAccessToken());
 
         HttpHeaders headers = new HttpHeaders();
@@ -89,8 +88,10 @@ public class SpotifyService {
         StringBuilder urlStringBuilder = new StringBuilder();
         urlStringBuilder.append("https://api.spotify.com/v1/me/player/devices");
 
-        String token = getToken();
-        StringBuilder bearerToken = new StringBuilder("Bearer ").append(token);
+        Client client = clientRepository.findById(CLIENT_ID_TEST)
+                .orElseThrow(() -> new RuntimeException("Client not found"));
+
+        StringBuilder bearerToken = new StringBuilder("Bearer ").append(client.getAccessToken());
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", bearerToken.toString());
@@ -108,31 +109,6 @@ public class SpotifyService {
         } catch (HttpStatusCodeException e){
             logger.error(e.getLocalizedMessage());
             return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
-        }
-    }
-
-    public String getToken(){
-        StringBuilder urlStringBuilder = new StringBuilder();
-        urlStringBuilder.append("https://accounts.spotify.com/api/token?");
-        urlStringBuilder.append("grant_type=").append("client_credentials");
-        StringBuilder basicAuthentication = new StringBuilder(clientId).append(":").append(clientSecret);
-        String encodedBasicAuthentication = Base64.getEncoder()
-                .encodeToString((basicAuthentication.toString()).getBytes());
-        StringBuilder encodedBasicAuthenticationHeader = new StringBuilder( "Basic ")
-                .append(encodedBasicAuthentication);
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization" ,encodedBasicAuthenticationHeader.toString());
-        HttpEntity<String> request = new HttpEntity<>(headers);
-
-        ResponseEntity<SpotifyToken> responseEntity;
-
-        try{
-            responseEntity = restTemplate.postForEntity(urlStringBuilder.toString(), request, SpotifyToken.class);
-            logger.info(responseEntity.toString());
-            return responseEntity.getBody().getAccessToken();
-        } catch (HttpStatusCodeException e){
-            logger.error(e.getLocalizedMessage());
-            return null;
         }
     }
 
