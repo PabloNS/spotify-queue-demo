@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Base64;
 import java.util.Optional;
 
@@ -134,7 +136,7 @@ public class SpotifyService {
         }
     }
 
-    public void authorize(){
+    public void authorize(HttpServletResponse response){
         StringBuilder urlStringBuilder = new StringBuilder();
         urlStringBuilder.append("https://accounts.spotify.com/authorize?");
         urlStringBuilder.append("response_type=").append("code");
@@ -143,15 +145,12 @@ public class SpotifyService {
         urlStringBuilder.append("&scope=").append("user-read-playback-state user-modify-playback-state");
 
         try{
-            ResponseEntity<String> exchange = restTemplate.exchange(urlStringBuilder.toString(), HttpMethod.GET,
-                    null, String.class);
-            logger.info(exchange.toString());
-        } catch (HttpStatusCodeException e){
-            logger.error(e.getLocalizedMessage());
+            response.sendRedirect(urlStringBuilder.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
-    //https://accounts.spotify.com/authorize?response_type=code&redirect_uri=http://localhost:8080/spotify/token&client_id=eb47463b20674120a13bcd1690fe58e3&scope=user-read-playback-state user-modify-playback-state
     public ResponseEntity getAuthorizationCodeToken(String code){
         Optional<Client> optClient = clientRepository.findById(CLIENT_ID_TEST);
         Client client = optClient.orElse(null);

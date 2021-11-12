@@ -5,6 +5,8 @@ import com.example.spotifyqueuedemo.service.SpotifyService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
+
 @RestController
 @RequestMapping("spotify")
 public class SpotifyController {
@@ -26,11 +28,13 @@ public class SpotifyController {
     }
 
     @GetMapping("authorize")
-    public void authorize(){
-         service.authorize();
+    @CrossOrigin(origins = "http://localhost:3000")
+    public void authorize(HttpServletResponse response){
+         service.authorize(response);
     }
 
     @GetMapping("token")
+    @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:8888"})
     public ResponseEntity token(@RequestParam String code){
         return service.getAuthorizationCodeToken(code);
     }
