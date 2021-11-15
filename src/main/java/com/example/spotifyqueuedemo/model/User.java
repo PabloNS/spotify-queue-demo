@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document
 @Data
 @Builder
-public class Client {
+public class User {
 
     @Id
     private String id;
@@ -16,4 +16,10 @@ public class Client {
     private String accessToken;
 
     private String refreshToken;
+
+    private String spotifyId;
+
+    private String spotifyDisplayName;
+
+    private String spotifyEmail;
 }

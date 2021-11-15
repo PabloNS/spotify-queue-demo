@@ -1,7 +1,7 @@
 package com.example.spotifyqueuedemo.service;
 
-import com.example.spotifyqueuedemo.model.Client;
-import com.example.spotifyqueuedemo.model.ClientRepository;
+import com.example.spotifyqueuedemo.model.User;
+import com.example.spotifyqueuedemo.model.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,15 +13,15 @@ public class ClientService {
 
     private Logger logger = LoggerFactory.getLogger(ClientService.class);
 
-    private ClientRepository clientRepository;
+    private UserRepository userRepository;
 
-    public ClientService(ClientRepository clientRepository){
-        this.clientRepository = clientRepository;
+    public ClientService(UserRepository userRepository){
+        this.userRepository = userRepository;
     }
 
     //@Cacheable(value = "clientCache")
-    public Client getClient(String id){
-        return clientRepository.findById(id).orElseGet(() -> {
+    public User getClient(String id){
+        return userRepository.findById(id).orElseGet(() -> {
             logger.error("Client with id {} doesn't exist", id);
             return null; });
     }

@@ -1,6 +1,7 @@
 package com.example.spotifyqueuedemo.controller;
 
 import com.example.spotifyqueuedemo.dto.QueueSongDto;
+import com.example.spotifyqueuedemo.model.User;
 import com.example.spotifyqueuedemo.service.SpotifyService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,14 +29,20 @@ public class SpotifyController {
     }
 
     @GetMapping("authorize")
-    @CrossOrigin(origins = "http://localhost:3000")
+    @CrossOrigin(origins = {"http://localhost:8888"})
     public void authorize(HttpServletResponse response){
          service.authorize(response);
     }
 
     @GetMapping("token")
-    @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:8888"})
+    @CrossOrigin(origins = {"http://localhost:8888"})
     public ResponseEntity token(@RequestParam String code){
         return service.getAuthorizationCodeToken(code);
+    }
+
+    @PostMapping("saveUser")
+    @CrossOrigin(origins = {"http://localhost:8888"})
+    public ResponseEntity saveUser(@RequestBody User user){
+        return service.saveUser(user);
     }
 }

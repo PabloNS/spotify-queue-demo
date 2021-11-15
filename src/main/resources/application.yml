@@ -1,6 +1,6 @@
 spotify:
-  clientId: eb47463b20674120a13bcd1690fe58e3
-  clientSecret: fecc84ab16ac4c0f94c298c8bf30418e
+  clientId:
+  clientSecret:
 spring:
   data:
     mongodb:

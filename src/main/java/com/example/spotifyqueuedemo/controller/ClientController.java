@@ -1,6 +1,6 @@
 package com.example.spotifyqueuedemo.controller;
 
-import com.example.spotifyqueuedemo.model.Client;
+import com.example.spotifyqueuedemo.model.User;
 import com.example.spotifyqueuedemo.service.ClientService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,7 +18,7 @@ public class ClientController {
     }
 
     @GetMapping("{id}")
-    public Client getClient(@PathVariable String id){
+    public User getClient(@PathVariable String id){
         return service.getClient(id);
     }
 }
