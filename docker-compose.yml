@@ -13,6 +13,9 @@ services:
   #    - 6379:6379
   spotify-queue-demo:
     image: spotify-queue-demo:latest
+    environment:
+      - SPOTIFY_CLIENT_ID=${SPOTIFY_CLIENT_ID}
+      - SPOTIFY_CLIENT_SECRET=${SPOTIFY_CLIENT_SECRET}
     container_name: spotify-queue-demo
     ports:
       - 8080:8080

@@ -1,6 +1,6 @@
 spotify:
-  clientId:
-  clientSecret:
+  clientId: ${SPOTIFY_CLIENT_ID}
+  clientSecret: ${SPOTIFY_CLIENT_SECRET}
 spring:
   data:
     mongodb:

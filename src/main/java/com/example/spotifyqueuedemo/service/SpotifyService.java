@@ -15,7 +15,6 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.swing.text.html.Option;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.Optional;
@@ -36,13 +35,13 @@ public class SpotifyService {
 
     private RestTemplate restTemplate;
 
-    private ClientService clientService;
+    private UserService userService;
 
     private UserRepository userRepository;
 
-    public SpotifyService(RestTemplate restTemplate, ClientService clientService, UserRepository userRepository){
+    public SpotifyService(RestTemplate restTemplate, UserService userService, UserRepository userRepository){
         this.restTemplate = restTemplate;
-        this.clientService = clientService;
+        this.userService = userService;
         this.userRepository = userRepository;
     }
 

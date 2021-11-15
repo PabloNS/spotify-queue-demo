@@ -7,15 +7,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @Slf4j
-public class ClientService {
+public class UserService {
 
-    private Logger logger = LoggerFactory.getLogger(ClientService.class);
+    private Logger logger = LoggerFactory.getLogger(UserService.class);
 
     private UserRepository userRepository;
 
-    public ClientService(UserRepository userRepository){
+    public UserService(UserRepository userRepository){
         this.userRepository = userRepository;
     }
 
@@ -24,5 +26,9 @@ public class ClientService {
         return userRepository.findById(id).orElseGet(() -> {
             logger.error("Client with id {} doesn't exist", id);
             return null; });
+    }
+
+    public List<User> getAllClients(){
+        return userRepository.findAll();
     }
 }
