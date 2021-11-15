@@ -40,9 +40,4 @@ public class SpotifyController {
         return service.getAuthorizationCodeToken(code);
     }
 
-    @PostMapping("saveUser")
-    @CrossOrigin(origins = {"http://localhost:8888"})
-    public ResponseEntity saveUser(@RequestBody User user){
-        return service.saveUser(user);
-    }
 }

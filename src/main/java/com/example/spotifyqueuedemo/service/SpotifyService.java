@@ -35,13 +35,10 @@ public class SpotifyService {
 
     private RestTemplate restTemplate;
 
-    private UserService userService;
-
     private UserRepository userRepository;
 
-    public SpotifyService(RestTemplate restTemplate, UserService userService, UserRepository userRepository){
+    public SpotifyService(RestTemplate restTemplate, UserRepository userRepository){
         this.restTemplate = restTemplate;
-        this.userService = userService;
         this.userRepository = userRepository;
     }
 
@@ -200,13 +197,5 @@ public class SpotifyService {
         } catch (HttpStatusCodeException e){
             logger.error(e.getLocalizedMessage());
         }
-    }
-
-    public ResponseEntity saveUser(User user){
-        User userSaved = userRepository.findBySpotifyId(user.getSpotifyId());
-        Optional.ofNullable(userSaved).ifPresent(u ->
-                new ResponseEntity("User already exists", HttpStatus.OK));
-        userRepository.save(user);
-        return new ResponseEntity(user, HttpStatus.OK);
     }
 }

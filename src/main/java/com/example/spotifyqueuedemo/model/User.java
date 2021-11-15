@@ -22,4 +22,10 @@ public class User {
     private String spotifyDisplayName;
 
     private String spotifyEmail;
+
+    private Float positionLatitude;
+
+    private Float positionLongitude;
+
+    private Float positionAccuracy;
 }
