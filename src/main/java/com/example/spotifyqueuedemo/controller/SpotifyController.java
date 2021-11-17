@@ -40,4 +40,9 @@ public class SpotifyController {
         return service.getAuthorizationCodeToken(code);
     }
 
+    @GetMapping("search")
+    @CrossOrigin(origins = {"http://localhost:8888"})
+    public String searchTrack(@RequestParam("query") String query){
+        return service.searchTrack(query);
+    }
 }

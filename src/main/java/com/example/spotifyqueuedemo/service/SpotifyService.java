@@ -1,8 +1,6 @@
 package com.example.spotifyqueuedemo.service;
 
-import com.example.spotifyqueuedemo.dto.DeviceResponseDto;
-import com.example.spotifyqueuedemo.dto.QueueSongDto;
-import com.example.spotifyqueuedemo.dto.SpotifyToken;
+import com.example.spotifyqueuedemo.dto.*;
 import com.example.spotifyqueuedemo.model.User;
 import com.example.spotifyqueuedemo.model.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -132,39 +130,92 @@ public class SpotifyService {
             user = User.builder().id(CLIENT_ID_TEST).build();
         }
 
-        //if(client.getAccessToken() == null){
-            StringBuilder urlStringBuilder = new StringBuilder();
-            urlStringBuilder.append("https://accounts.spotify.com/api/token?");
-            urlStringBuilder.append("grant_type=").append("authorization_code");
-            urlStringBuilder.append("&code=").append(code);
-            urlStringBuilder.append("&redirect_uri=").append("http://localhost:8888/callback");
+        StringBuilder urlStringBuilder = new StringBuilder();
+        urlStringBuilder.append("https://accounts.spotify.com/api/token?");
+        urlStringBuilder.append("grant_type=").append("authorization_code");
+        urlStringBuilder.append("&code=").append(code);
+        urlStringBuilder.append("&redirect_uri=").append("http://localhost:8888/callback");
 
-            StringBuilder basicAuthentication = new StringBuilder(clientId).append(":").append(clientSecret);
-            String encodedBasicAuthentication = Base64.getEncoder()
-                    .encodeToString((basicAuthentication.toString()).getBytes());
-            StringBuilder encodedBasicAuthenticationHeader = new StringBuilder( "Basic ")
-                    .append(encodedBasicAuthentication);
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Authorization" ,encodedBasicAuthenticationHeader.toString());
-            HttpEntity<String> request = new HttpEntity<>(headers);
+        StringBuilder basicAuthentication = new StringBuilder(clientId).append(":").append(clientSecret);
+        String encodedBasicAuthentication = Base64.getEncoder()
+                .encodeToString((basicAuthentication.toString()).getBytes());
+        StringBuilder encodedBasicAuthenticationHeader = new StringBuilder( "Basic ")
+                .append(encodedBasicAuthentication);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization" ,encodedBasicAuthenticationHeader.toString());
+        HttpEntity<String> request = new HttpEntity<>(headers);
 
-            ResponseEntity<SpotifyToken> responseEntity;
+        ResponseEntity<SpotifyTokenDto> responseEntity;
 
-            try{
-                responseEntity = restTemplate.postForEntity(urlStringBuilder.toString(), request, SpotifyToken.class);
-                logger.info(responseEntity.toString());
-                SpotifyToken body = responseEntity.getBody();
-                user.setAccessToken(body.getAccessToken());
-                user.setRefreshToken(body.getRefreshToken());
-                userRepository.save(user);
-                return responseEntity;
-            } catch (HttpStatusCodeException e){
-                logger.error(e.getLocalizedMessage());
-                return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
-            }
-        //}
+        try{
+            responseEntity = restTemplate.postForEntity(urlStringBuilder.toString(), request, SpotifyTokenDto.class);
+            logger.info(responseEntity.toString());
+            SpotifyTokenDto body = responseEntity.getBody();
+            user.setAccessToken(body.getAccessToken());
+            user.setRefreshToken(body.getRefreshToken());
+            userRepository.save(user);
+            return responseEntity;
+        } catch (HttpStatusCodeException e){
+            logger.error(e.getLocalizedMessage());
+            return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
+        }
+    }
 
-        //return new ResponseEntity("Client already authorized", HttpStatus.OK);
+    public String searchTrack(String query){
+        String token = getToken();
+
+        StringBuilder urlStringBuilder = new StringBuilder();
+        urlStringBuilder.append("https://api.spotify.com/v1/search?");
+        urlStringBuilder.append("q=").append(query);
+        urlStringBuilder.append("&type=").append("track");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", token);
+        headers.add("Accept", "application/json");
+        headers.add("Content-Type", "application/json");
+
+        HttpEntity<String> request = new HttpEntity<>(headers);
+
+        ResponseEntity<SpotifySearchResultDto> responseEntity;
+
+        try {
+            responseEntity = restTemplate.exchange(urlStringBuilder.toString(),
+                    HttpMethod.GET, request, SpotifySearchResultDto.class);
+
+            return responseEntity.getBody().getTracks().getItems().get(0).getUri();
+        } catch (HttpStatusCodeException e){
+            logger.error(e.getLocalizedMessage());
+            return "Not Found";
+        }
+    }
+
+    private String getToken(){
+        StringBuilder urlStringBuilder = new StringBuilder();
+        urlStringBuilder.append("https://accounts.spotify.com/api/token?");
+        urlStringBuilder.append("grant_type=").append("client_credentials");
+        urlStringBuilder.append("&redirect_uri=").append("http://localhost:8888/callback");
+
+        StringBuilder basicAuthentication = new StringBuilder(clientId).append(":").append(clientSecret);
+        String encodedBasicAuthentication = Base64.getEncoder()
+                .encodeToString((basicAuthentication.toString()).getBytes());
+        StringBuilder encodedBasicAuthenticationHeader = new StringBuilder( "Basic ")
+                .append(encodedBasicAuthentication);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization" ,encodedBasicAuthenticationHeader.toString());
+        HttpEntity<String> request = new HttpEntity<>(headers);
+
+        ResponseEntity<SpotifyTokenDto> responseEntity;
+
+        try{
+            responseEntity = restTemplate.postForEntity(urlStringBuilder.toString(), request, SpotifyTokenDto.class);
+            logger.info(responseEntity.toString());
+            SpotifyTokenDto body = responseEntity.getBody();
+            StringBuilder token = new StringBuilder("Bearer ");
+            return token.append(body.getAccessToken()).toString();
+        } catch (HttpStatusCodeException e){
+            logger.error(e.getLocalizedMessage());
+            return null;
+        }
     }
 
     private void refreshToken(){
@@ -185,12 +236,12 @@ public class SpotifyService {
         headers.add("Authorization" ,encodedBasicAuthenticationHeader.toString());
         HttpEntity<String> request = new HttpEntity<>(headers);
 
-        ResponseEntity<SpotifyToken> responseEntity;
+        ResponseEntity<SpotifyTokenDto> responseEntity;
 
         try{
-            responseEntity = restTemplate.postForEntity(urlStringBuilder.toString(), request, SpotifyToken.class);
+            responseEntity = restTemplate.postForEntity(urlStringBuilder.toString(), request, SpotifyTokenDto.class);
             logger.info(responseEntity.toString());
-            SpotifyToken body = responseEntity.getBody();
+            SpotifyTokenDto body = responseEntity.getBody();
             user.setAccessToken(body.getAccessToken());
             user.setRefreshToken(body.getRefreshToken());
             userRepository.save(user);
