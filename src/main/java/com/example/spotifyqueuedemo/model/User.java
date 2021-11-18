@@ -5,6 +5,8 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.Instant;
+
 @Document
 @Data
 @Builder
@@ -28,4 +30,10 @@ public class User {
     private Float positionLongitude;
 
     private Float positionAccuracy;
+
+    private boolean withOpenQueue;
+
+    private int queuedSongs;
+
+    private Instant openQueueTime;
 }

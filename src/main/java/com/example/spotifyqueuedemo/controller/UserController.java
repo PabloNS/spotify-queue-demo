@@ -18,18 +18,24 @@ public class UserController {
     }
 
     @GetMapping("{id}")
-    public User getClient(@PathVariable String id){
-        return service.getClient(id);
+    public User getUser(@PathVariable String id){
+        return service.getUser(id);
     }
 
     @GetMapping
-    public List<User> getAllClients(){
-        return service.getAllClients();
+    public List<User> getAllUsers(){
+        return service.getAllUsers();
     }
 
     @PostMapping
     @CrossOrigin(origins = {"http://localhost:8888"})
     public ResponseEntity saveUser(@RequestBody User user){
         return service.saveUser(user);
+    }
+
+    @GetMapping("withOpenQueueNearMe")
+    @CrossOrigin(origins = {"http://localhost:8888"})
+    public List<User> getUsersWithOpenQueueNearMe(){
+        return service.getUsersWithOpenQueueNearMe();
     }
 }
