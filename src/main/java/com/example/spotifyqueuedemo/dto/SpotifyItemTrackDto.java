@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class SpotifyItemTrackDto {
 
-    private String uri;
+    private String id;
 }

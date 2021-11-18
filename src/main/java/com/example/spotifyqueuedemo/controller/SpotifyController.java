@@ -43,6 +43,6 @@ public class SpotifyController {
     @GetMapping("search")
     @CrossOrigin(origins = {"http://localhost:8888"})
     public String searchTrack(@RequestParam("query") String query){
-        return service.searchTrack(query);
+        return "{\"track\":\"" + service.searchTrack(query) + "\"}";
     }
 }

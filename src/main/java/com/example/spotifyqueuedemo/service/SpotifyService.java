@@ -182,7 +182,7 @@ public class SpotifyService {
             responseEntity = restTemplate.exchange(urlStringBuilder.toString(),
                     HttpMethod.GET, request, SpotifySearchResultDto.class);
 
-            return responseEntity.getBody().getTracks().getItems().get(0).getUri();
+            return responseEntity.getBody().getTracks().getItems().get(0).getId();
         } catch (HttpStatusCodeException e){
             logger.error(e.getLocalizedMessage());
             return "Not Found";
