@@ -5,6 +5,7 @@ import com.example.spotifyqueuedemo.model.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,12 @@ public class UserService {
     private UserRepository userRepository;
 
     private QueueService queueService;
+
+    @Value("${spotify.clientId}")
+    private String clientId;
+
+    @Value("${spotify.clientSecret}")
+    private String clientSecret;
 
     public UserService(UserRepository userRepository, QueueService queueService){
         this.userRepository = userRepository;
@@ -62,6 +69,6 @@ public class UserService {
         return usersWithOpenQueue.stream().filter(user ->
                 Math.abs(userAsking.getPositionLatitude() - user.getPositionLatitude()) <= 10
                 && Math.abs(userAsking.getPositionLongitude() - user.getPositionLongitude()) <= 10
-                && user.getOpenQueueTime().plusSeconds(60).isAfter(Instant.now())).collect(Collectors.toList());
+                && user.getOpenQueueTime().plusSeconds(120).isAfter(Instant.now())).collect(Collectors.toList());
     }
 }

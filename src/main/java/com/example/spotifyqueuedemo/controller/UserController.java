@@ -28,7 +28,7 @@ public class UserController {
     }
 
     @PostMapping
-    @CrossOrigin(origins = {"http://localhost:8888"})
+    @CrossOrigin(origins = {"http://localhost:8888", "http://localhost:3000"})
     public ResponseEntity saveUser(@RequestBody User user){
         return service.saveUser(user);
     }

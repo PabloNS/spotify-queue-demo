@@ -35,7 +35,7 @@ public class SpotifyController {
     }
 
     @GetMapping("token")
-    @CrossOrigin(origins = {"http://localhost:8888"})
+    @CrossOrigin(origins = {"http://localhost:8888", "http://localhost:3000/"})
     public ResponseEntity token(@RequestParam String code){
         return service.getAuthorizationCodeToken(code);
     }

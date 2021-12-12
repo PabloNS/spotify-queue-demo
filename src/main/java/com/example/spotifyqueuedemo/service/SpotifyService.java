@@ -35,9 +35,12 @@ public class SpotifyService {
 
     private UserRepository userRepository;
 
-    public SpotifyService(RestTemplate restTemplate, UserRepository userRepository){
+    private UserService userService;
+
+    public SpotifyService(RestTemplate restTemplate, UserRepository userRepository, UserService userService){
         this.restTemplate = restTemplate;
         this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     public ResponseEntity addSongToQueue(QueueSongDto queueSongDto){
@@ -123,18 +126,11 @@ public class SpotifyService {
     }
 
     public ResponseEntity getAuthorizationCodeToken(String code){
-        Optional<User> optClient = userRepository.findById(CLIENT_ID_TEST);
-        User user = optClient.orElse(null);
-
-        if(user == null){
-            user = User.builder().id(CLIENT_ID_TEST).build();
-        }
-
         StringBuilder urlStringBuilder = new StringBuilder();
         urlStringBuilder.append("https://accounts.spotify.com/api/token?");
         urlStringBuilder.append("grant_type=").append("authorization_code");
         urlStringBuilder.append("&code=").append(code);
-        urlStringBuilder.append("&redirect_uri=").append("http://localhost:8888/callback");
+        urlStringBuilder.append("&redirect_uri=").append("http://localhost:3000/");
 
         StringBuilder basicAuthentication = new StringBuilder(clientId).append(":").append(clientSecret);
         String encodedBasicAuthentication = Base64.getEncoder()
@@ -151,13 +147,42 @@ public class SpotifyService {
             responseEntity = restTemplate.postForEntity(urlStringBuilder.toString(), request, SpotifyTokenDto.class);
             logger.info(responseEntity.toString());
             SpotifyTokenDto body = responseEntity.getBody();
-            user.setAccessToken(body.getAccessToken());
-            user.setRefreshToken(body.getRefreshToken());
-            userRepository.save(user);
+            MeDto meDto = getMeInformation(body.getAccessToken());
+            userService.saveUser(User.builder().accessToken(body.getAccessToken())
+                    .refreshToken(body.getRefreshToken())
+                    .spotifyDisplayName(meDto.getDisplayName())
+                    .spotifyEmail(meDto.getEmail())
+                    .spotifyId(meDto.getId())
+                    .build());
             return responseEntity;
         } catch (HttpStatusCodeException e){
             logger.error(e.getLocalizedMessage());
             return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
+        }
+    }
+
+    public MeDto getMeInformation(String accessToken){
+        StringBuilder tokenBuilder = new StringBuilder("Bearer ");
+        tokenBuilder.append(accessToken);
+
+        StringBuilder urlStringBuilder = new StringBuilder();
+        urlStringBuilder.append("https://api.spotify.com/v1/me");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + accessToken);
+        HttpEntity<String> request = new HttpEntity<>(headers);
+
+        ResponseEntity<MeDto> responseEntity;
+
+        try{
+            responseEntity = restTemplate.exchange(urlStringBuilder.toString(),
+                    HttpMethod.GET, request, MeDto.class);
+            logger.info(responseEntity.toString());
+            MeDto body = responseEntity.getBody();
+            return body;
+        } catch (HttpStatusCodeException e){
+            logger.error(e.getLocalizedMessage());
+            return null;
         }
     }
 
