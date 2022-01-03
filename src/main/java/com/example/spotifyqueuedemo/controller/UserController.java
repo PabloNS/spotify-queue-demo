@@ -1,7 +1,9 @@
 package com.example.spotifyqueuedemo.controller;
 
+import com.example.spotifyqueuedemo.dto.UserPositionDto;
 import com.example.spotifyqueuedemo.model.User;
 import com.example.spotifyqueuedemo.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +33,13 @@ public class UserController {
     @CrossOrigin(origins = {"http://localhost:8888", "http://localhost:3000"})
     public ResponseEntity saveUser(@RequestBody User user){
         return service.saveUser(user);
+    }
+
+    @PostMapping("recommendMe")
+    @CrossOrigin(origins = {"http://localhost:8888", "http://localhost:3000"})
+    public ResponseEntity updateUser(@RequestBody UserPositionDto userPositionDto){
+        service.recommendMe(userPositionDto);
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     @GetMapping("withOpenQueueNearMe")

@@ -4,8 +4,6 @@ import com.example.spotifyqueuedemo.dto.*;
 import com.example.spotifyqueuedemo.model.User;
 import com.example.spotifyqueuedemo.model.UserRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -15,7 +13,6 @@ import org.springframework.web.client.RestTemplate;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Base64;
-import java.util.Optional;
 
 import static com.example.spotifyqueuedemo.utils.Constants.CLIENT_ID_TEST;
 
@@ -29,24 +26,28 @@ public class SpotifyService {
     @Value("${spotify.clientSecret}")
     private String clientSecret;
 
-    private Logger logger = LoggerFactory.getLogger(SpotifyService.class);
-
     private RestTemplate restTemplate;
 
     private UserRepository userRepository;
 
     private UserService userService;
 
-    public SpotifyService(RestTemplate restTemplate, UserRepository userRepository, UserService userService){
+    private QueueService queueService;
+
+    public SpotifyService(RestTemplate restTemplate, UserRepository userRepository, UserService userService,
+                          QueueService queueService){
         this.restTemplate = restTemplate;
         this.userRepository = userRepository;
         this.userService = userService;
+        this.queueService = queueService;
     }
 
     public ResponseEntity addSongToQueue(QueueSongDto queueSongDto){
 
-        User user = userRepository.findById(CLIENT_ID_TEST)
-                .orElseThrow(() -> new RuntimeException("Client not found"));
+        //User user = userRepository.findById(CLIENT_ID_TEST)
+        //        .orElseThrow(() -> new RuntimeException("Client not found"));
+
+        User user = userRepository.findAll().get(0);
 
         StringBuilder urlStringBuilder = new StringBuilder();
         urlStringBuilder.append("https://api.spotify.com/v1/me/player/queue?");
@@ -65,7 +66,7 @@ public class SpotifyService {
         try{
             ResponseEntity<String> responseEntity = restTemplate.postForEntity(urlStringBuilder.toString(), request,
                     String.class);
-            logger.error(responseEntity.toString());
+            log.error(responseEntity.toString());
             return responseEntity;
         } catch (HttpStatusCodeException e){
             if(e.getStatusCode().equals(HttpStatus.UNAUTHORIZED) && !e.getResponseBodyAsString().isEmpty()){
@@ -74,10 +75,10 @@ public class SpotifyService {
                 headers.add("Authorization", bearerToken.toString());
                 ResponseEntity<String> responseEntity = restTemplate.postForEntity(urlStringBuilder.toString(), request,
                         String.class);
-                logger.error(responseEntity.toString());
+                log.error(responseEntity.toString());
                 return responseEntity;
             }
-            logger.error(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
             return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
         }
     }
@@ -86,8 +87,10 @@ public class SpotifyService {
         StringBuilder urlStringBuilder = new StringBuilder();
         urlStringBuilder.append("https://api.spotify.com/v1/me/player/devices");
 
-        User user = userRepository.findById(CLIENT_ID_TEST)
-                .orElseThrow(() -> new RuntimeException("Client not found"));
+        //User user = userRepository.findById(CLIENT_ID_TEST)
+        //        .orElseThrow(() -> new RuntimeException("Client not found"));
+
+        User user = userRepository.findAll().get(0);
 
         StringBuilder bearerToken = new StringBuilder("Bearer ").append(user.getAccessToken());
 
@@ -101,11 +104,11 @@ public class SpotifyService {
         try{
             ResponseEntity<DeviceResponseDto> responseEntity = restTemplate.exchange(urlStringBuilder.toString(),
                     HttpMethod.GET, request, DeviceResponseDto.class);
-            logger.error(responseEntity.toString());
+            log.error(responseEntity.toString());
             return new ResponseEntity<>(responseEntity.getBody().getDevices().stream().filter(
                     deviceDto -> deviceDto.isActive()), HttpStatus.OK);
         } catch (HttpStatusCodeException e){
-            logger.error(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
             return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
         }
     }
@@ -145,10 +148,11 @@ public class SpotifyService {
 
         try{
             responseEntity = restTemplate.postForEntity(urlStringBuilder.toString(), request, SpotifyTokenDto.class);
-            logger.info(responseEntity.toString());
+            log.info(responseEntity.toString());
             SpotifyTokenDto body = responseEntity.getBody();
             MeDto meDto = getMeInformation(body.getAccessToken());
-            userService.saveUser(User.builder().accessToken(body.getAccessToken())
+            userService.saveUser(User.builder().id("User1")
+                    .accessToken(body.getAccessToken())
                     .refreshToken(body.getRefreshToken())
                     .spotifyDisplayName(meDto.getDisplayName())
                     .spotifyEmail(meDto.getEmail())
@@ -156,7 +160,7 @@ public class SpotifyService {
                     .build());
             return responseEntity;
         } catch (HttpStatusCodeException e){
-            logger.error(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
             return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
         }
     }
@@ -177,11 +181,11 @@ public class SpotifyService {
         try{
             responseEntity = restTemplate.exchange(urlStringBuilder.toString(),
                     HttpMethod.GET, request, MeDto.class);
-            logger.info(responseEntity.toString());
+            log.info(responseEntity.toString());
             MeDto body = responseEntity.getBody();
             return body;
         } catch (HttpStatusCodeException e){
-            logger.error(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
             return null;
         }
     }
@@ -209,7 +213,7 @@ public class SpotifyService {
 
             return responseEntity.getBody().getTracks().getItems().get(0).getId();
         } catch (HttpStatusCodeException e){
-            logger.error(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
             return "Not Found";
         }
     }
@@ -233,12 +237,12 @@ public class SpotifyService {
 
         try{
             responseEntity = restTemplate.postForEntity(urlStringBuilder.toString(), request, SpotifyTokenDto.class);
-            logger.info(responseEntity.toString());
+            log.info(responseEntity.toString());
             SpotifyTokenDto body = responseEntity.getBody();
             StringBuilder token = new StringBuilder("Bearer ");
             return token.append(body.getAccessToken()).toString();
         } catch (HttpStatusCodeException e){
-            logger.error(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
             return null;
         }
     }
@@ -265,13 +269,18 @@ public class SpotifyService {
 
         try{
             responseEntity = restTemplate.postForEntity(urlStringBuilder.toString(), request, SpotifyTokenDto.class);
-            logger.info(responseEntity.toString());
+            log.info(responseEntity.toString());
             SpotifyTokenDto body = responseEntity.getBody();
             user.setAccessToken(body.getAccessToken());
             user.setRefreshToken(body.getRefreshToken());
             userRepository.save(user);
+            try {
+                queueService.closeUserQueue(user);
+            } catch (InterruptedException e) {
+                //log
+            }
         } catch (HttpStatusCodeException e){
-            logger.error(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
         }
     }
 }

@@ -20,6 +20,10 @@ public class QueueService {
     public void closeUserQueue(User user) throws InterruptedException {
         Thread.sleep(10000);
         user.setWithOpenQueue(false);
+        user.setOpenQueueTime(null);
+        user.setPositionLongitude(null);
+        user.setPositionLatitude(null);
+        user.setPositionAccuracy(null);
         userRepository.save(user);
     }
 }
